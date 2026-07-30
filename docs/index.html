@@ -1,0 +1,920 @@
+<title>AI Analyst Builder</title>
+<style>
+  :root{
+    --canvas:#181818;
+    --canvas-elevated:#303030;
+    --canvas-elevated-2:#252525;
+    --hairline-on-canvas:#303030;
+    --hairline-on-elevated:rgba(255,255,255,0.09);
+    --primary:#da291c;
+    --primary-active:#b01e0a;
+    --primary-gradient:linear-gradient(180deg,#a00c01,#da291c 64%);
+    --ink:#ffffff;
+    --body:#969696;
+    --muted:#6f6f6f;
+    --success:#1fae63;
+    --on-primary:#ffffff;
+
+    --xxxs:4px; --xxs:8px; --xs:16px; --sm:24px; --md:32px; --lg:48px; --xl:64px; --xxl:96px; --super:128px;
+
+    --font-display:-apple-system, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-body:-apple-system, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono:"SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  img,canvas,svg{display:block;max-width:100%;}
+  button{font-family:inherit;cursor:pointer;}
+  ::selection{background:var(--primary);color:var(--on-primary);}
+  :focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+
+  .wrap{max-width:1280px;margin:0 auto;padding-left:var(--xs);padding-right:var(--xs);}
+  @media (min-width:1024px){.wrap{padding-left:var(--md);padding-right:var(--md);}}
+
+  .eyebrow{
+    font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;
+    color:var(--body);
+  }
+  .eyebrow.on-primary{color:rgba(255,255,255,0.85);}
+
+  /* ---------- NAV ---------- */
+  .top-nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(24,24,24,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--hairline-on-canvas);
+  }
+  .top-nav .wrap{
+    height:64px;display:flex;align-items:center;justify-content:space-between;gap:var(--md);
+  }
+  .brand{display:flex;align-items:center;gap:var(--xxs);}
+  .brand-mark{width:22px;height:22px;flex:none;}
+  .brand-name{
+    font-family:var(--font-display);font-weight:500;font-size:14px;letter-spacing:0.4px;
+    text-transform:uppercase;
+  }
+  .nav-links{display:none;gap:var(--md);align-items:center;}
+  @media (min-width:1024px){.nav-links{display:flex;}}
+  .nav-link{
+    font-size:13px;font-weight:600;letter-spacing:0.65px;text-transform:uppercase;color:var(--body);
+  }
+  .nav-link:hover{color:var(--ink);}
+  .nav-cta{display:none;}
+  @media (min-width:1024px){.nav-cta{display:flex;align-items:center;gap:var(--sm);}}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    height:48px;padding:0 32px;border-radius:0;border:none;
+    font-family:var(--font-body);font-size:14px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--primary);color:var(--on-primary);}
+  .btn-primary:active{background:var(--primary-active);}
+  .btn-outline{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,0.55);}
+  .btn-outline:hover{border-color:var(--ink);}
+  .btn-sm{height:40px;padding:0 22px;font-size:12px;}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;isolation:isolate;}
+  .hero-canvas-frame{
+    position:relative;width:100%;
+    height:88vh;min-height:560px;max-height:900px;
+    overflow:hidden;background:var(--canvas);
+  }
+  #hero-canvas{position:absolute;inset:0;width:100%;height:100%;}
+  .hero-scrim{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(24,24,24,0) 0%, rgba(24,24,24,0.15) 55%, rgba(24,24,24,0.94) 100%);
+    pointer-events:none;
+  }
+  .hero-content{
+    position:absolute;left:0;right:0;bottom:0;
+    padding:0 0 var(--xl);
+  }
+  .hero-content .wrap{max-width:920px;}
+  .hero-eyebrow{margin-bottom:var(--xs);}
+  .hero-title{
+    font-family:var(--font-display);font-weight:500;
+    font-size:44px;line-height:1.05;letter-spacing:-1px;
+    text-wrap:balance;
+    margin-bottom:var(--sm);
+  }
+  @media (min-width:640px){.hero-title{font-size:60px;letter-spacing:-1.3px;}}
+  @media (min-width:1024px){.hero-title{font-size:80px;letter-spacing:-1.6px;}}
+  .hero-title em{color:var(--primary);font-style:normal;}
+  .hero-sub{
+    font-size:16px;line-height:1.6;color:var(--body);max-width:56ch;margin-bottom:var(--md);
+  }
+  @media (min-width:1024px){.hero-sub{font-size:18px;}}
+  .hero-ctas{display:flex;flex-wrap:wrap;gap:var(--xs);}
+  .hero-note{margin-top:var(--sm);font-size:12.5px;color:var(--muted);}
+
+  /* ---------- OLD CYCLE ---------- */
+  .cycle-callout{
+    margin-top:var(--sm);padding:var(--xs) var(--sm);
+    background:var(--canvas-elevated);border:1px solid var(--hairline-on-elevated);
+    display:flex;align-items:baseline;gap:var(--xs);flex-wrap:wrap;
+  }
+  .cycle-callout-arrow{color:var(--primary);font-family:var(--font-mono);}
+  .cycle-callout-text{font-size:14px;color:var(--body);}
+  .cycle-callout-text strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- COMPARE TABLE ---------- */
+  .compare-scroll{overflow-x:auto;border:1px solid var(--hairline-on-canvas);}
+  table.compare-table{width:100%;border-collapse:collapse;min-width:720px;}
+  .compare-table th{
+    text-align:left;padding:var(--xs) var(--sm);
+    font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);
+    border-bottom:1px solid var(--hairline-on-canvas);background:var(--canvas-elevated-2);
+  }
+  .compare-table td{
+    padding:var(--xs) var(--sm);border-bottom:1px solid var(--hairline-on-canvas);
+    font-size:13.5px;color:var(--body);vertical-align:top;
+  }
+  .compare-table tr:last-child td{border-bottom:none;}
+  .compare-table td.tool{font-family:var(--font-mono);font-size:13px;color:var(--ink);white-space:nowrap;}
+  .compare-table tr.us td{color:var(--ink);}
+  .compare-table tr.us td.tool{color:var(--primary);font-weight:600;}
+
+  /* ---------- TARGET BADGE ---------- */
+  .spec-cell .badge-pill{margin-top:10px;}
+
+  /* ---------- SECTION SCAFFOLD ---------- */
+  section{padding:var(--xxl) 0;}
+  .section-head{
+    display:flex;flex-direction:column;gap:var(--xxs);
+    margin-bottom:var(--lg);
+    max-width:760px;
+  }
+  .section-title{
+    font-family:var(--font-display);font-weight:500;font-size:28px;letter-spacing:-0.3px;
+    text-wrap:balance;
+  }
+  @media (min-width:1024px){.section-title{font-size:36px;letter-spacing:-0.36px;}}
+  .section-sub{color:var(--body);font-size:15px;max-width:60ch;}
+  .hr{height:1px;background:var(--hairline-on-canvas);border:none;}
+
+  /* ---------- PIPELINE CARDS ---------- */
+  .pipeline-grid{
+    display:grid;grid-template-columns:1fr;gap:1px;
+    background:var(--hairline-on-canvas);
+    border:1px solid var(--hairline-on-canvas);
+  }
+  @media (min-width:640px){.pipeline-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (min-width:1024px){.pipeline-grid{grid-template-columns:repeat(4,1fr);}}
+  .pipeline-card{
+    background:var(--canvas);padding:var(--sm);display:flex;flex-direction:column;gap:var(--xs);
+    min-height:280px;
+  }
+  .pipeline-glyph{width:32px;height:32px;color:var(--primary);}
+  .pipeline-stage-index{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
+  .pipeline-name{font-family:var(--font-display);font-weight:500;font-size:22px;letter-spacing:-0.2px;}
+  .pipeline-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  .pipeline-list li{
+    font-size:13px;color:var(--body);padding-left:14px;position:relative;line-height:1.45;
+  }
+  .pipeline-list li::before{
+    content:"";position:absolute;left:0;top:7px;width:5px;height:5px;background:var(--muted);
+  }
+
+  /* ---------- SPEC / NUMBER GRID ---------- */
+  .spec-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:var(--md);
+  }
+  @media (min-width:1024px){.spec-grid{grid-template-columns:repeat(4,1fr);}}
+  .spec-cell{text-align:left;}
+  .spec-number{
+    font-family:var(--font-display);font-weight:700;font-size:48px;line-height:1;letter-spacing:-1px;
+    font-variant-numeric:tabular-nums;
+    color:var(--ink);
+  }
+  @media (min-width:1024px){.spec-number{font-size:72px;letter-spacing:-1.4px;}}
+  .spec-number.accent{color:var(--primary);}
+  .spec-label{
+    margin-top:var(--xxs);font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--body);
+  }
+
+  /* ---------- LIVERY BAND ---------- */
+  .livery-band{
+    background:var(--primary-gradient);
+    padding:var(--xxl) 0;
+    text-align:center;
+  }
+  .livery-band .wrap{max-width:880px;}
+  .livery-title{
+    font-family:var(--font-display);font-weight:500;font-size:26px;letter-spacing:-0.2px;color:var(--ink);
+    text-wrap:balance;
+  }
+  @media (min-width:1024px){.livery-title{font-size:36px;letter-spacing:-0.36px;}}
+  .livery-caption{margin-top:var(--xs);color:rgba(255,255,255,0.8);font-size:14px;}
+
+  /* ---------- AGENT ROSTER ---------- */
+  .agent-grid{
+    display:grid;grid-template-columns:1fr;gap:1px;background:var(--hairline-on-canvas);
+    border:1px solid var(--hairline-on-canvas);
+  }
+  @media (min-width:640px){.agent-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (min-width:1024px){.agent-grid{grid-template-columns:repeat(4,1fr);}}
+  .agent-card{
+    background:var(--canvas-elevated);padding:var(--xs);
+    display:flex;flex-direction:column;gap:10px;min-height:132px;
+  }
+  .agent-num{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
+  .agent-name{font-family:var(--font-display);font-weight:500;font-size:16px;letter-spacing:0.08px;}
+  .agent-role{font-size:12.5px;color:var(--body);line-height:1.5;}
+
+  /* ---------- DEMO SPLIT ---------- */
+  .demo-split{
+    display:grid;grid-template-columns:1fr;gap:1px;
+    background:var(--hairline-on-canvas);border:1px solid var(--hairline-on-canvas);
+  }
+  @media (min-width:900px){.demo-split{grid-template-columns:1.05fr 0.95fr;}}
+  .demo-pane{background:var(--canvas-elevated);padding:var(--sm);}
+  .demo-pane-label{
+    font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);
+    margin-bottom:var(--xs);
+    display:flex;align-items:center;gap:8px;
+  }
+  .demo-pane-label .dot{width:6px;height:6px;background:var(--success);border-radius:50%;}
+  .terminal{
+    font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#cfcfcf;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .terminal .cmd{color:var(--ink);}
+  .terminal .stage{color:var(--primary);}
+  .terminal .ok{color:var(--success);}
+  .terminal .dim{color:var(--muted);}
+
+  .deck-card{
+    background:var(--canvas-elevated-2);border:1px solid var(--hairline-on-elevated);padding:var(--sm);
+  }
+  .deck-eyebrow{font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);}
+  .deck-title{
+    font-family:var(--font-display);font-weight:500;font-size:19px;line-height:1.3;margin:var(--xxs) 0 var(--sm);
+    text-wrap:balance;
+  }
+  .chart-area{height:150px;}
+  .deck-source{margin-top:var(--xs);font-size:11px;color:var(--muted);}
+  .badge-row{display:flex;gap:8px;margin-top:var(--sm);flex-wrap:wrap;}
+  .badge-pill{
+    display:inline-flex;align-items:center;height:24px;padding:0 12px;border-radius:9999px;
+    background:var(--canvas-elevated);border:1px solid var(--hairline-on-elevated);
+    font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink);
+  }
+  .badge-pill.ok::before{content:"";width:6px;height:6px;background:var(--success);border-radius:50%;margin-right:7px;}
+
+  /* ---------- MODES TABLE ---------- */
+  .modes{border-top:1px solid var(--hairline-on-canvas);}
+  .mode-row{
+    display:grid;grid-template-columns:1fr;gap:6px;
+    padding:var(--xs) 0;border-bottom:1px solid var(--hairline-on-canvas);
+  }
+  @media (min-width:768px){
+    .mode-row{grid-template-columns:220px 1fr 140px;align-items:center;gap:var(--md);}
+  }
+  .mode-name{font-family:var(--font-mono);font-size:14px;color:var(--ink);}
+  .mode-desc{font-size:13.5px;color:var(--body);}
+  .mode-count{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;}
+  @media (min-width:768px){.mode-count{text-align:right;}}
+
+  /* ---------- GET STARTED ---------- */
+  .steps{
+    display:grid;grid-template-columns:1fr;gap:var(--xs);margin-top:var(--lg);
+  }
+  @media (min-width:900px){.steps{grid-template-columns:repeat(3,1fr);}}
+  .step-card{background:var(--canvas-elevated);border:1px solid var(--hairline-on-elevated);padding:var(--sm);}
+  .step-index{
+    font-family:var(--font-mono);font-size:12px;color:var(--primary);margin-bottom:var(--xs);
+  }
+  .step-title{font-family:var(--font-display);font-weight:500;font-size:16px;margin-bottom:8px;}
+  .step-code{
+    font-family:var(--font-mono);font-size:12.5px;color:#cfcfcf;background:var(--canvas);
+    padding:10px 12px;border:1px solid var(--hairline-on-elevated);overflow-x:auto;
+  }
+
+  .cta-band{
+    text-align:center;padding:var(--xxl) 0;background:var(--canvas);
+    border-top:1px solid var(--hairline-on-canvas);
+  }
+  .cta-band .wrap{max-width:680px;display:flex;flex-direction:column;align-items:center;gap:var(--sm);}
+  .cta-title{
+    font-family:var(--font-display);font-weight:500;font-size:30px;letter-spacing:-0.3px;text-wrap:balance;
+  }
+  @media (min-width:1024px){.cta-title{font-size:40px;letter-spacing:-0.4px;}}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--canvas);border-top:1px solid var(--hairline-on-canvas);padding:var(--xl) 0 var(--lg);}
+  .footer-grid{display:grid;grid-template-columns:1fr;gap:var(--lg);}
+  @media (min-width:640px){.footer-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (min-width:1024px){.footer-grid{grid-template-columns:2fr repeat(3,1fr);}}
+  .footer-col-title{
+    font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);
+    margin-bottom:var(--xs);
+  }
+  .footer-links{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .footer-link{color:var(--body);font-size:13.5px;}
+  .footer-link:hover{color:var(--ink);}
+  .footer-bottom{
+    margin-top:var(--xl);padding-top:var(--sm);border-top:1px solid var(--hairline-on-canvas);
+    display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--xs);
+    font-size:12px;color:var(--muted);
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+  }
+</style>
+
+<nav class="top-nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="AI Analyst Builder home">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2 L21 20 L12 16 L3 20 Z" fill="#da291c"/>
+      </svg>
+      <span class="brand-name">Analyst&nbsp;Builder</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="#pipeline">Pipeline</a>
+      <a class="nav-link" href="#agents">Agents</a>
+      <a class="nav-link" href="#modes">Modes</a>
+      <a class="nav-link" href="#compare">Why This</a>
+      <a class="nav-link" href="#start">Docs</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-primary btn-sm" href="demo.html">Live Demo</a>
+      <a class="btn btn-outline btn-sm" href="#start">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-canvas-frame">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hero-scrim"></div>
+    <div class="hero-content">
+      <div class="wrap">
+        <p class="eyebrow hero-eyebrow">Hypothesis &middot; IC Product Analysts, Series B&ndash;D SaaS</p>
+        <h1 class="hero-title">Five days of mechanical work.<br>Under <em>two hours</em>, validated.</h1>
+        <p class="hero-sub">AI Analyst Builder runs 18 specialized agents from a plain-English business question to a branded, validated slide deck &mdash; cutting time-to-deck from roughly 5 days to under 2 hours for analysts at data-light companies.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="demo.html">Launch the Demo</a>
+          <a class="btn btn-outline" href="#pipeline">See How It Works</a>
+        </div>
+        <p class="hero-note">Terminal-first, built on Claude Code. This page is a concept mockup &mdash; the real product has no web UI. The demo above simulates the pipeline with canned data.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section aria-label="The manual cycle this replaces">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Problem</p>
+        <h2 class="section-title">A business question shouldn't take a week to answer</h2>
+        <p class="section-sub">The standard cycle for an IC analyst with no dedicated data engineering team, told in six days.</p>
+      </div>
+      <div class="modes">
+        <div class="mode-row">
+          <span class="mode-name">Monday</span>
+          <span class="mode-desc">Business question surfaces in a meeting.</span>
+          <span class="mode-count">Day 1</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">Tue&ndash;Wed</span>
+          <span class="mode-desc">Data exploration: find the right tables, understand the schema, write exploratory queries.</span>
+          <span class="mode-count">Day 2&ndash;3</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">Thursday</span>
+          <span class="mode-desc">Build charts, validate numbers, spot-check aggregations.</span>
+          <span class="mode-count">Day 4</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">Friday</span>
+          <span class="mode-desc">Write the narrative, build the deck.</span>
+          <span class="mode-count">Day 5</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">Following Monday</span>
+          <span class="mode-desc">Present findings &mdash; often after the decision has already been made on gut feel.</span>
+          <span class="mode-count">Day 6</span>
+        </div>
+      </div>
+      <div class="cycle-callout">
+        <span class="cycle-callout-arrow">&rarr;</span>
+        <span class="cycle-callout-text">With AI Analyst Builder, the same cycle runs in <strong>under 2 hours</strong>, target across the first 10 live analyses.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Pipeline</p>
+        <h2 class="section-title">Frame. Analyze. Story. Deck.</h2>
+        <p class="section-sub">Independent agents resolve dependencies and run in parallel, up to three at once. Quality gates checkpoint the work before it moves to the next phase.</p>
+      </div>
+
+      <div class="pipeline-grid">
+        <article class="pipeline-card">
+          <svg class="pipeline-glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M16 21v7M12 30h8" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg>
+          <span class="pipeline-stage-index">01</span>
+          <h3 class="pipeline-name">Frame</h3>
+          <ul class="pipeline-list">
+            <li>Frame the business question</li>
+            <li>Generate testable hypotheses</li>
+            <li>Checkpoint before touching data</li>
+          </ul>
+        </article>
+        <article class="pipeline-card">
+          <svg class="pipeline-glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="13" cy="13" r="9" stroke="currentColor" stroke-width="2"/><path d="M20 20l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg>
+          <span class="pipeline-stage-index">02</span>
+          <h3 class="pipeline-name">Analyze</h3>
+          <ul class="pipeline-list">
+            <li>Explore data, verify integrity</li>
+            <li>Drill down to root cause</li>
+            <li>Validate findings, size opportunity</li>
+          </ul>
+        </article>
+        <article class="pipeline-card">
+          <svg class="pipeline-glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M4 24 Q 12 8, 16 16 T 28 6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <span class="pipeline-stage-index">03</span>
+          <h3 class="pipeline-name">Story</h3>
+          <ul class="pipeline-list">
+            <li>Design Context-Tension-Resolution beats</li>
+            <li>Generate SWD-styled charts</li>
+            <li>Review visuals against the checklist</li>
+          </ul>
+        </article>
+        <article class="pipeline-card">
+          <svg class="pipeline-glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="6" y="5" width="20" height="22" stroke="currentColor" stroke-width="2"/><path d="M10 11h12M10 16h12M10 21h8" stroke="currentColor" stroke-width="2"/></svg>
+          <span class="pipeline-stage-index">04</span>
+          <h3 class="pipeline-name">Deck</h3>
+          <ul class="pipeline-list">
+            <li>Write the narrative</li>
+            <li>Build the branded slide deck</li>
+            <li>Export as PDF or HTML</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Key figures">
+    <div class="wrap">
+      <div class="spec-grid">
+        <div class="spec-cell">
+          <div class="spec-number">18</div>
+          <div class="spec-label">Specialized agents</div>
+        </div>
+        <div class="spec-cell">
+          <div class="spec-number">4</div>
+          <div class="spec-label">Validation layers</div>
+        </div>
+        <div class="spec-cell">
+          <div class="spec-number accent">606</div>
+          <div class="spec-label">Tests passing</div>
+        </div>
+        <div class="spec-cell">
+          <div class="spec-number">20</div>
+          <div class="spec-label">Slash commands</div>
+        </div>
+      </div>
+      <p class="section-sub" style="margin-top:var(--lg);max-width:64ch;">Every finding passes structural, logical, business-rules, and Simpson's-paradox checks before it reaches a slide. Grade C and below stays internal &mdash; only grade B and above is safe to share with a stakeholder.</p>
+    </div>
+  </section>
+
+  <section class="livery-band">
+    <div class="wrap">
+      <p class="eyebrow on-primary">The Moat</p>
+      <h2 class="livery-title">After 50 analyses, the system knows your schema, your metric definitions, your common errors, and your business context. A generic SaaS tool starts from scratch every session.</h2>
+      <p class="livery-caption">Corrections, query archaeology, and the business glossary compound &mdash; every logged fix and proven SQL pattern makes the next analysis faster and more accurate.</p>
+    </div>
+  </section>
+
+  <section id="agents">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Roster</p>
+        <h2 class="section-title">Twelve of the eighteen agents on shift</h2>
+        <p class="section-sub">Each agent is a markdown prompt template with a defined contract — read, substitute variables, execute. Editable, not a black box.</p>
+      </div>
+
+      <div class="agent-grid">
+        <article class="agent-card"><span class="agent-num">01</span><h3 class="agent-name">Hypothesis</h3><p class="agent-role">Generates testable theories across product, technical, and external causes.</p></article>
+        <article class="agent-card"><span class="agent-num">02</span><h3 class="agent-name">Data Explorer</h3><p class="agent-role">Profiles schema, quality, and gaps before analysis begins.</p></article>
+        <article class="agent-card"><span class="agent-num">03</span><h3 class="agent-name">Source Tie-Out</h3><p class="agent-role">Cross-checks pandas against SQL before analysis proceeds. Halts on mismatch.</p></article>
+        <article class="agent-card"><span class="agent-num">04</span><h3 class="agent-name">Descriptive Analytics</h3><p class="agent-role">Segments, funnels, and decomposes the metric in question.</p></article>
+        <article class="agent-card"><span class="agent-num">05</span><h3 class="agent-name">Root Cause Investigator</h3><p class="agent-role">Drills down through dimensions to a specific, actionable cause.</p></article>
+        <article class="agent-card"><span class="agent-num">06</span><h3 class="agent-name">Validation</h3><p class="agent-role">Runs the four-layer check and assigns a confidence grade.</p></article>
+        <article class="agent-card"><span class="agent-num">07</span><h3 class="agent-name">Opportunity Sizer</h3><p class="agent-role">Quantifies business impact with sensitivity analysis.</p></article>
+        <article class="agent-card"><span class="agent-num">08</span><h3 class="agent-name">Story Architect</h3><p class="agent-role">Builds Context-Tension-Resolution narrative beats from findings.</p></article>
+        <article class="agent-card"><span class="agent-num">09</span><h3 class="agent-name">Chart Maker</h3><p class="agent-role">Builds each chart to Storytelling-with-Data standards.</p></article>
+        <article class="agent-card"><span class="agent-num">10</span><h3 class="agent-name">Visual Design Critic</h3><p class="agent-role">Reviews every chart and deck against the SWD checklist.</p></article>
+        <article class="agent-card"><span class="agent-num">11</span><h3 class="agent-name">Deck Creator</h3><p class="agent-role">Assembles the branded Marp deck with speaker notes.</p></article>
+        <article class="agent-card"><span class="agent-num">12</span><h3 class="agent-name">Comms Drafter</h3><p class="agent-role">Drafts the Slack summary, email brief, and exec version.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Live demo">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">In The Terminal</p>
+        <h2 class="section-title">One question in. One slide out.</h2>
+      </div>
+
+      <div class="demo-split">
+        <div class="demo-pane">
+          <p class="demo-pane-label"><span class="dot"></span>Terminal</p>
+          <pre class="terminal"><span class="dim">$</span> <span class="cmd">/run-pipeline data_path=data/checkout/ question="Why is conversion dropping?"</span>
+
+<span class="stage">&#9656; FRAME</span>    4 hypotheses generated
+<span class="stage">&#9656; ANALYZE</span>  root cause isolated &mdash; mobile checkout latency
+<span class="stage">&#9656; STORY</span>    6 narrative beats mapped
+<span class="stage">&#9656; DECK</span>     12 slides, speaker notes attached
+
+<span class="ok">&#10003; Confidence grade: B+</span>
+<span class="ok">&#10003; 606 tests passing &middot; 4-layer validation clear</span></pre>
+        </div>
+        <div class="demo-pane">
+          <p class="demo-pane-label"><span class="dot"></span>Output &mdash; Slide 4 of 12</p>
+          <div class="deck-card">
+            <p class="deck-eyebrow">Checkout &middot; Mobile</p>
+            <h3 class="deck-title">Conversion dropped 8pts after the mobile redesign shipped</h3>
+            <canvas class="chart-area" id="mini-chart" aria-label="Bar chart highlighting a drop in mobile checkout conversion after redesign launch"></canvas>
+            <p class="deck-source">Source: checkout_events, Mar 1&ndash;Apr 30 &middot; n = 412,880 sessions</p>
+            <div class="badge-row">
+              <span class="badge-pill ok">Validated</span>
+              <span class="badge-pill">Root cause: latency</span>
+              <span class="badge-pill">Grade B+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modes">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Pipeline Modes</p>
+        <h2 class="section-title">Run the whole thing, or just the part you need</h2>
+      </div>
+      <div class="modes">
+        <div class="mode-row">
+          <span class="mode-name">full_presentation</span>
+          <span class="mode-desc">Complete analysis to slide deck, start to finish.</span>
+          <span class="mode-count">18 agents</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">deep_dive</span>
+          <span class="mode-desc">Analysis only &mdash; no presentation layer.</span>
+          <span class="mode-count">12 agents</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">quick_chart</span>
+          <span class="mode-desc">Just make one chart, straight to Chart Maker.</span>
+          <span class="mode-count">1 agent</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">refresh_deck</span>
+          <span class="mode-desc">Re-do the presentation using existing analysis.</span>
+          <span class="mode-count">4 agents</span>
+        </div>
+        <div class="mode-row">
+          <span class="mode-name">validate_only</span>
+          <span class="mode-desc">Check existing work against the four-layer gate.</span>
+          <span class="mode-count">3 agents</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Why This, Not&hellip;</p>
+        <h2 class="section-title">Question &rarr; validated root cause &rarr; branded deck. Nothing else goes end to end.</h2>
+      </div>
+      <div class="compare-scroll">
+        <table class="compare-table">
+          <thead>
+            <tr><th>Tool</th><th>What it does</th><th>What's missing</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tool">ChatGPT / Claude (chat)</td>
+              <td>Generates SQL and charts on request.</td>
+              <td>No memory across sessions. No validation. No business context. Restarts from zero every time.</td>
+            </tr>
+            <tr>
+              <td class="tool">Claude Code alone</td>
+              <td>Writes the SQL you describe.</td>
+              <td>A coding assistant, not an analyst. You drive every step manually. No framing, no validation pipeline, no deck output.</td>
+            </tr>
+            <tr>
+              <td class="tool">BI tools (Looker, Tableau)</td>
+              <td>Persistent dashboards.</td>
+              <td>Answers "what" happened, not "why." No narrative, no root cause, no recommendation.</td>
+            </tr>
+            <tr>
+              <td class="tool">AI SQL tools (Julius, Noteable)</td>
+              <td>Natural language to SQL.</td>
+              <td>No validation layer, no framing, no storyboard, no deck. Closed SaaS &mdash; no customization.</td>
+            </tr>
+            <tr>
+              <td class="tool">Jupyter + Copilot</td>
+              <td>AI-assisted notebook.</td>
+              <td>Still requires the analyst to drive every step. No orchestration. No deck output.</td>
+            </tr>
+            <tr class="us">
+              <td class="tool">AI Analyst Builder</td>
+              <td>Question &rarr; validated root cause &rarr; branded slide deck.</td>
+              <td>Automated, resumable, and self-learning &mdash; corrections logged today sharpen every analysis after.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Success targets">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Success Metrics</p>
+        <h2 class="section-title">What "working" means, before it ships</h2>
+        <p class="section-sub">Targets for the first 10&ndash;60 days post-publish &mdash; not results claimed yet.</p>
+      </div>
+      <div class="spec-grid">
+        <div class="spec-cell">
+          <div class="spec-number accent">&lt;2h</div>
+          <div class="spec-label">Time-to-deck &middot; from ~5 days</div>
+          <span class="badge-pill">Target &middot; first 10 runs</span>
+        </div>
+        <div class="spec-cell">
+          <div class="spec-number">80%</div>
+          <div class="spec-label">Pipeline success, no halts</div>
+          <span class="badge-pill">Target &middot; 60 days</span>
+        </div>
+        <div class="spec-cell">
+          <div class="spec-number">70%</div>
+          <div class="spec-label">Chart pass rate, first try</div>
+          <span class="badge-pill">Target &middot; 60 days</span>
+        </div>
+        <div class="spec-cell">
+          <div class="spec-number">200</div>
+          <div class="spec-label">GitHub stars</div>
+          <span class="badge-pill">Target &middot; 90 days</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Get Started</p>
+        <h2 class="section-title">Three steps to your first deck</h2>
+        <p class="section-sub">Bring your own data &mdash; CSV, DuckDB, Postgres, BigQuery, or Snowflake. No bundled datasets.</p>
+      </div>
+      <div class="steps">
+        <div class="step-card">
+          <p class="step-index">01</p>
+          <h3 class="step-title">Install Claude Code</h3>
+          <div class="step-code">npm install -g @anthropic-ai/claude-code</div>
+        </div>
+        <div class="step-card">
+          <p class="step-index">02</p>
+          <h3 class="step-title">Clone and set up</h3>
+          <div class="step-code">git clone ai-analyst-lab/ai-analyst<br>cd ai-analyst &amp;&amp; pip install -e ".[dev]"</div>
+        </div>
+        <div class="step-card">
+          <p class="step-index">03</p>
+          <h3 class="step-title">Connect data, ask a question</h3>
+          <div class="step-code">/run-pipeline question="&hellip;"</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <p class="eyebrow">Before You Start</p>
+      <h2 class="cta-title">You are the expert. This handles the other 80%.</h2>
+      <p class="section-sub" style="text-align:center;max-width:52ch;">It catches data mistakes, validates findings, and builds the deck. You validate the output &mdash; correct it once, and it remembers.</p>
+      <a class="btn btn-primary" href="#top">Read the Setup Guide</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="margin-bottom:var(--xs);">
+          <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 L21 20 L12 16 L3 20 Z" fill="#da291c"/></svg>
+          <span class="brand-name">Analyst&nbsp;Builder</span>
+        </div>
+        <p style="color:var(--body);font-size:13.5px;max-width:32ch;">An AI-powered product analyst that turns business questions into validated insights, narratives, and slide decks.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Product</p>
+        <ul class="footer-links">
+          <li><a class="footer-link" href="#pipeline">Pipeline</a></li>
+          <li><a class="footer-link" href="#agents">Agents</a></li>
+          <li><a class="footer-link" href="#modes">Modes</a></li>
+          <li><a class="footer-link" href="#">Themes</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Data Sources</p>
+        <ul class="footer-links">
+          <li><a class="footer-link" href="#">CSV</a></li>
+          <li><a class="footer-link" href="#">DuckDB / MotherDuck</a></li>
+          <li><a class="footer-link" href="#">Postgres</a></li>
+          <li><a class="footer-link" href="#">BigQuery &amp; Snowflake</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Docs</p>
+        <ul class="footer-links">
+          <li><a class="footer-link" href="#">Setup guide</a></li>
+          <li><a class="footer-link" href="#">Theming &amp; styling</a></li>
+          <li><a class="footer-link" href="#">CLAUDE.md reference</a></li>
+          <li><a class="footer-link" href="#">GitHub issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Concept mockup of a terminal-first tool &mdash; the real product runs in Claude Code with no web UI. MIT License.</span>
+      <span>&copy; AI Analyst Builder</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var canvas = document.getElementById('hero-canvas');
+  var ctx = canvas.getContext('2d');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W, H, nodes = [], t = 0;
+  var focal;
+
+  function size(){
+    var frame = canvas.parentElement.getBoundingClientRect();
+    W = frame.width; H = frame.height;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    focal = { x: W * 0.82, y: H * 0.38 };
+    buildNodes();
+  }
+
+  function buildNodes(){
+    nodes = [];
+    var count = W < 640 ? 26 : 46;
+    for (var i = 0; i < count; i++){
+      var angle = Math.random() * Math.PI * 2;
+      var radius = 60 + Math.random() * Math.max(W, H) * 0.62;
+      nodes.push({
+        x: focal.x + Math.cos(angle) * radius,
+        y: focal.y + Math.sin(angle) * radius,
+        speed: 0.15 + Math.random() * 0.35,
+        offset: Math.random() * Math.PI * 2,
+        radius: radius,
+        angle: angle,
+        drift: (Math.random() - 0.5) * 0.0016
+      });
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    var grad = ctx.createRadialGradient(focal.x, focal.y, 0, focal.x, focal.y, Math.max(W,H) * 0.75);
+    grad.addColorStop(0, 'rgba(218,41,28,0.16)');
+    grad.addColorStop(0.35, 'rgba(218,41,28,0.05)');
+    grad.addColorStop(1, 'rgba(24,24,24,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+
+    for (var i = 0; i < nodes.length; i++){
+      var n = nodes[i];
+      if (!reduced){ n.angle += n.drift; }
+      var nx = focal.x + Math.cos(n.angle) * n.radius;
+      var ny = focal.y + Math.sin(n.angle) * n.radius;
+
+      var pulse = reduced ? 0.5 : (Math.sin(t * n.speed + n.offset) + 1) / 2;
+      var alpha = 0.05 + pulse * 0.16;
+
+      ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(nx, ny);
+      ctx.lineTo(focal.x, focal.y);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.25 + pulse * 0.35) + ')';
+      ctx.beginPath();
+      ctx.arc(nx, ny, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    var corePulse = reduced ? 0.6 : (Math.sin(t * 0.6) + 1) / 2;
+    var coreR = 3 + corePulse * 3;
+    var coreGrad = ctx.createRadialGradient(focal.x, focal.y, 0, focal.x, focal.y, coreR * 6);
+    coreGrad.addColorStop(0, 'rgba(218,41,28,0.9)');
+    coreGrad.addColorStop(1, 'rgba(218,41,28,0)');
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath();
+    ctx.arc(focal.x, focal.y, coreR * 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(focal.x, focal.y, coreR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function loop(){
+    t += 0.016;
+    draw();
+    if (!reduced){ requestAnimationFrame(loop); }
+  }
+
+  window.addEventListener('resize', size);
+  size();
+  draw();
+  if (!reduced){ requestAnimationFrame(loop); }
+})();
+
+(function(){
+  var el = document.getElementById('mini-chart');
+  if (!el) return;
+  var ctx = el.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function draw(){
+    var rect = el.getBoundingClientRect();
+    var W = rect.width, H = rect.height;
+    el.width = W * dpr; el.height = H * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H);
+
+    var values = [61, 63, 60, 62, 22, 24, 21];
+    var labels = ['W1','W2','W3','W4','W5','W6','W7'];
+    var highlightIndex = 4;
+    var max = 70;
+    var padTop = 10, padBottom = 22, padX = 6;
+    var plotH = H - padTop - padBottom;
+    var barW = (W - padX * 2) / values.length;
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padX, H - padBottom + 0.5);
+    ctx.lineTo(W - padX, H - padBottom + 0.5);
+    ctx.stroke();
+
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+
+    for (var i = 0; i < values.length; i++){
+      var v = values[i];
+      var h = (v / max) * plotH;
+      var x = padX + i * barW + barW * 0.22;
+      var w = barW * 0.56;
+      var y = H - padBottom - h;
+      ctx.fillStyle = (i === highlightIndex) ? '#da291c' : 'rgba(255,255,255,0.28)';
+      ctx.fillRect(x, y, w, h);
+
+      ctx.fillStyle = (i === highlightIndex) ? '#ffffff' : 'rgba(255,255,255,0.45)';
+      ctx.fillText(labels[i], x + w/2, H - padBottom + 13);
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    ctx.font = '600 11px -apple-system, sans-serif';
+    ctx.fillText('-38%', padX + highlightIndex * barW + barW * 0.22 - 4, H - padBottom - ((values[highlightIndex]/max)*plotH) - 8);
+  }
+
+  draw();
+  window.addEventListener('resize', draw);
+})();
+</script>

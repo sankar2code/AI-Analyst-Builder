@@ -1,0 +1,720 @@
+<title>AI Analyst Builder — Interactive Mockup</title>
+<style>
+  :root{
+    --canvas:#181818;
+    --canvas-elevated:#303030;
+    --canvas-elevated-2:#242424;
+    --hairline:#303030;
+    --hairline-soft:rgba(255,255,255,0.09);
+    --primary:#da291c;
+    --primary-active:#b01e0a;
+    --ink:#ffffff;
+    --body:#9a9a9a;
+    --muted:#6f6f6f;
+    --success:#1fae63;
+    --warn:#d9a02b;
+    --on-primary:#ffffff;
+
+    --xxxs:4px; --xxs:8px; --xs:16px; --sm:24px; --md:32px; --lg:48px; --xl:64px; --xxl:96px;
+
+    --font-display:-apple-system,"SF Pro Display","Segoe UI",Helvetica,Arial,sans-serif;
+    --font-body:-apple-system,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+    --font-mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--canvas);color:var(--ink);font-family:var(--font-body);
+    font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p{margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+  ::selection{background:var(--primary);color:var(--on-primary);}
+  :focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:0 var(--xs);}
+  @media (min-width:1024px){.wrap{padding:0 var(--md);}}
+
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--body);}
+
+  /* ---------- BANNER ---------- */
+  .concept-banner{
+    background:var(--canvas-elevated-2);border-bottom:1px solid var(--hairline);
+    padding:10px 0;text-align:center;font-size:12.5px;color:var(--body);
+  }
+  .concept-banner strong{color:var(--ink);}
+
+  /* ---------- TOP CONTROL BAR ---------- */
+  .control-bar{
+    position:sticky;top:0;z-index:40;background:rgba(24,24,24,0.92);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--hairline);padding:var(--xs) 0;
+  }
+  .control-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--xs);}
+  .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:500;font-size:14px;text-transform:uppercase;letter-spacing:0.4px;}
+  .brand svg{width:20px;height:20px;}
+
+  .segmented{display:inline-flex;background:var(--canvas-elevated);border:1px solid var(--hairline-soft);padding:3px;gap:3px;}
+  .segmented button{
+    border:none;background:transparent;color:var(--body);font-size:12px;font-weight:700;
+    letter-spacing:1px;text-transform:uppercase;padding:9px 16px;
+  }
+  .segmented button.active{background:var(--primary);color:var(--on-primary);}
+  .segmented button:not(.active):hover{color:var(--ink);}
+
+  .scenario-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .scenario-pill{
+    border:1px solid var(--hairline-soft);background:var(--canvas-elevated);color:var(--body);
+    font-size:12px;font-weight:600;letter-spacing:0.4px;padding:9px 14px;white-space:nowrap;
+  }
+  .scenario-pill .mode-tag{display:block;font-size:9.5px;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase;margin-top:2px;}
+  .scenario-pill.active{border-color:var(--primary);color:var(--ink);background:var(--canvas-elevated-2);}
+  .scenario-pill.active .mode-tag{color:var(--primary);}
+  .scenario-pill:hover{color:var(--ink);}
+
+  main{padding:var(--md) 0 var(--xxl);}
+
+  /* ================= TERMINAL MODE ================= */
+  .stepper{display:flex;gap:1px;background:var(--hairline);border:1px solid var(--hairline);margin-bottom:var(--sm);}
+  .step{
+    flex:1;background:var(--canvas);padding:var(--xs);text-align:center;
+  }
+  .step .step-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+  .step.done .step-label{color:var(--success);}
+  .step.active .step-label{color:var(--primary);}
+  .step.skipped .step-label{color:var(--muted);text-decoration:line-through;}
+  .step .step-sub{font-size:10.5px;color:var(--muted);margin-top:4px;}
+
+  .term-grid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--hairline);border:1px solid var(--hairline);}
+  @media (min-width:960px){.term-grid{grid-template-columns:1.1fr 0.9fr;}}
+  .term-pane, .out-pane{background:var(--canvas-elevated);padding:var(--sm);min-height:420px;display:flex;flex-direction:column;}
+  .pane-label{font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:var(--xs);display:flex;align-items:center;justify-content:space-between;}
+  .cmd-line{
+    font-family:var(--font-mono);font-size:13px;color:var(--ink);background:var(--canvas);
+    border:1px solid var(--hairline-soft);padding:12px 14px;margin-bottom:var(--xs);word-break:break-word;
+  }
+  .cmd-line::before{content:"$ ";color:var(--muted);}
+  .run-btn{
+    height:44px;padding:0 24px;border:none;background:var(--primary);color:var(--on-primary);
+    font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;align-self:flex-start;margin-bottom:var(--sm);
+  }
+  .run-btn:disabled{background:var(--canvas-elevated-2);color:var(--muted);cursor:default;}
+  .run-btn:active:not(:disabled){background:var(--primary-active);}
+
+  .term-log{
+    font-family:var(--font-mono);font-size:12.5px;line-height:1.75;color:#c9c9c9;
+    flex:1;overflow-y:auto;max-height:420px;white-space:pre-wrap;
+  }
+  .term-log .l-header{color:var(--primary);font-weight:700;}
+  .term-log .l-ok{color:var(--success);}
+  .term-log .l-dim{color:var(--muted);}
+  .term-log .l-agent{color:#c9c9c9;}
+  .term-empty{color:var(--muted);font-size:13px;}
+
+  .result-empty{
+    flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
+    color:var(--muted);font-size:13px;border:1px dashed var(--hairline-soft);padding:var(--lg);
+  }
+  .deck-card{background:var(--canvas-elevated-2);border:1px solid var(--hairline-soft);padding:var(--sm);}
+  .deck-eyebrow{font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);}
+  .deck-title{font-family:var(--font-display);font-weight:500;font-size:18px;line-height:1.35;margin:8px 0 var(--sm);text-wrap:balance;}
+  .chart-area{height:150px;width:100%;}
+  .deck-source{margin-top:var(--xs);font-size:11px;color:var(--muted);}
+  .badge-row{display:flex;gap:8px;margin-top:var(--sm);flex-wrap:wrap;}
+  .badge-pill{
+    display:inline-flex;align-items:center;height:24px;padding:0 12px;border-radius:9999px;
+    background:var(--canvas-elevated);border:1px solid var(--hairline-soft);
+    font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink);
+  }
+  .badge-pill.ok::before{content:"";width:6px;height:6px;background:var(--success);border-radius:50%;margin-right:7px;}
+  .badge-pill.warn{color:var(--warn);border-color:rgba(217,160,43,0.4);}
+  .no-deck-note{margin-top:var(--sm);font-size:12.5px;color:var(--muted);border-left:2px solid var(--hairline-soft);padding-left:10px;}
+
+  /* ================= DASHBOARD MODE ================= */
+  .app-shell{display:grid;grid-template-columns:1fr;gap:1px;background:var(--hairline);border:1px solid var(--hairline);min-height:560px;}
+  @media (min-width:860px){.app-shell{grid-template-columns:200px 1fr;}}
+  .sidebar{background:var(--canvas-elevated);padding:var(--xs);}
+  .side-link{
+    display:block;width:100%;text-align:left;background:transparent;border:none;color:var(--body);
+    font-size:13px;font-weight:600;padding:11px 12px;letter-spacing:0.3px;
+  }
+  .side-link.active{background:var(--canvas-elevated-2);color:var(--ink);border-left:2px solid var(--primary);}
+  .side-link:hover{color:var(--ink);}
+  .content{background:var(--canvas);padding:var(--sm);}
+  @media (min-width:1024px){.content{padding:var(--md);}}
+  .view-title{font-family:var(--font-display);font-weight:500;font-size:22px;margin-bottom:4px;}
+  .view-sub{color:var(--body);font-size:13.5px;margin-bottom:var(--md);}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--xs);}
+  @media (min-width:700px){.stat-grid{grid-template-columns:repeat(4,1fr);}}
+  .stat-tile{background:var(--canvas-elevated);border:1px solid var(--hairline-soft);padding:var(--xs);}
+  .stat-value{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-0.3px;font-variant-numeric:tabular-nums;}
+  .stat-value.grade-a,.stat-value.grade-b{color:var(--success);}
+  .stat-value.grade-c{color:var(--warn);}
+  .stat-label{margin-top:6px;font-size:10.5px;font-weight:600;letter-spacing:0.9px;text-transform:uppercase;color:var(--muted);}
+
+  .board{display:grid;grid-template-columns:1fr;gap:1px;background:var(--hairline);border:1px solid var(--hairline);}
+  @media (min-width:760px){.board{grid-template-columns:repeat(4,1fr);}}
+  .board-col{background:var(--canvas);padding:var(--xs);}
+  .board-col-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--xs);}
+  .board-col-head span:first-child{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);}
+  .board-col-head span:last-child{font-size:10.5px;color:var(--muted);}
+  .agent-chip{background:var(--canvas-elevated);border:1px solid var(--hairline-soft);padding:10px 12px;margin-bottom:8px;}
+  .agent-chip-name{font-size:13px;color:var(--ink);}
+  .agent-chip-status{display:block;margin-top:5px;font-size:9.5px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;}
+  .agent-chip-status.done{color:var(--success);}
+  .agent-chip-status.skipped{color:var(--muted);}
+  .board-empty{font-size:12px;color:var(--muted);padding:10px 2px;}
+
+  table.data-table{width:100%;border-collapse:collapse;}
+  .data-table-scroll{overflow-x:auto;border:1px solid var(--hairline-soft);}
+  .data-table th{
+    text-align:left;padding:10px 14px;font-size:10.5px;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;
+    color:var(--muted);border-bottom:1px solid var(--hairline-soft);background:var(--canvas-elevated-2);white-space:nowrap;
+  }
+  .data-table td{padding:10px 14px;font-size:13px;color:var(--body);border-bottom:1px solid var(--hairline-soft);white-space:nowrap;}
+  .data-table tr:last-child td{border-bottom:none;}
+  .data-table td.mono{font-family:var(--font-mono);color:var(--ink);}
+
+  .grade-block{display:flex;align-items:center;gap:var(--sm);background:var(--canvas-elevated);border:1px solid var(--hairline-soft);padding:var(--sm);margin-bottom:var(--sm);}
+  .grade-circle{
+    width:64px;height:64px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:700;font-size:26px;border:2px solid var(--success);color:var(--success);
+  }
+  .grade-circle.warn{border-color:var(--warn);color:var(--warn);}
+  .grade-copy{font-size:13px;color:var(--body);}
+  .grade-copy strong{color:var(--ink);}
+
+  .hyp-row{display:grid;grid-template-columns:1fr;gap:4px;padding:12px 0;border-bottom:1px solid var(--hairline-soft);}
+  @media (min-width:700px){.hyp-row{grid-template-columns:140px 1fr 110px;align-items:center;gap:var(--xs);}}
+  .hyp-cause{font-size:11px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:var(--muted);}
+  .hyp-text{font-size:13.5px;color:var(--ink);}
+  .hyp-status{font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;}
+  .hyp-status.confirmed{color:var(--success);}
+  .hyp-status.rejected{color:var(--muted);}
+  .hyp-status.contributing{color:var(--warn);}
+
+  .val-list{display:grid;grid-template-columns:1fr;gap:1px;background:var(--hairline);border:1px solid var(--hairline);margin-top:var(--sm);}
+  @media (min-width:700px){.val-list{grid-template-columns:repeat(4,1fr);}}
+  .val-item{background:var(--canvas-elevated);padding:var(--xs);}
+  .val-item .v-name{font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--muted);}
+  .val-item .v-status{margin-top:6px;font-size:13px;font-weight:600;}
+  .val-item .v-status.pass{color:var(--success);}
+  .val-item .v-status.flag{color:var(--warn);}
+
+  .slide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--xs);}
+  @media (min-width:700px){.slide-grid{grid-template-columns:repeat(3,1fr);}}
+  .slide-card{background:var(--canvas-elevated);border:1px solid var(--hairline-soft);padding:var(--xs);min-height:96px;}
+  .slide-num{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);}
+  .slide-title{font-size:12.5px;color:var(--ink);margin:6px 0 4px;line-height:1.3;}
+  .slide-body{font-size:11px;color:var(--body);line-height:1.4;}
+
+  .empty-state{
+    padding:var(--xl) var(--sm);text-align:center;color:var(--muted);font-size:13px;
+    border:1px dashed var(--hairline-soft);
+  }
+  .empty-state strong{display:block;color:var(--body);font-size:14px;margin-bottom:6px;}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:0.001ms !important;transition-duration:0.001ms !important;}
+  }
+</style>
+
+<div class="concept-banner">
+  <span class="wrap"><strong>Interactive concept mockup</strong> — every run below is simulated with canned data, client-side only. No live pipeline, no real data connection, no AI calls. The real product is terminal-only.</span>
+</div>
+
+<div class="control-bar">
+  <div class="wrap control-row">
+    <div style="display:flex;align-items:center;gap:var(--sm);">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 L21 20 L12 16 L3 20 Z" fill="#da291c"/></svg>
+        Analyst&nbsp;Builder
+      </div>
+      <a href="index.html" style="font-size:12px;font-weight:600;letter-spacing:0.4px;color:var(--body);white-space:nowrap;">&larr; Overview</a>
+    </div>
+    <div class="segmented" role="tablist" aria-label="Mockup mode">
+      <button id="tab-terminal" class="active" role="tab" aria-selected="true">Terminal Mode</button>
+      <button id="tab-dashboard" role="tab" aria-selected="false">Dashboard Concept</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <div class="scenario-row" id="scenario-row" style="margin-bottom:var(--md);" role="tablist" aria-label="Scenario"></div>
+
+    <div id="terminal-view"></div>
+    <div id="dashboard-view" style="display:none;"></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var SCENARIOS = {
+    checkout: {
+      id:'checkout', label:'Checkout Conversion', mode:'full_presentation', modeLabel:'Full Presentation',
+      command:'/run-pipeline question="Why is checkout conversion dropping?"',
+      dataset:'checkout_events',
+      phasesRun:['frame','analyze','story','deck'],
+      agentsByPhase:{
+        frame:[['Question Framing','done'],['Data Explorer','done']],
+        analyze:[['Source Tie-Out','done'],['Descriptive Analytics','done'],['Root Cause Investigator','done'],['Validation','done'],['Opportunity Sizer','done']],
+        story:[['Story Architect','done'],['Coherence Reviewer','done'],['Chart Maker','done'],['Design Critic','done']],
+        deck:[['Storytelling','done'],['Deck Creator','done'],['Slide Reviewer','done'],['Comms Drafter','done']]
+      },
+      agentCount:15,
+      time:'1h 42m', timeLabel:'Time-to-deck',
+      confidence:'B+', gradeClass:'grade-b',
+      hypotheses:[
+        {cause:'Product Change', text:'Mobile checkout redesign shipped Mar 14', status:'confirmed'},
+        {cause:'Technical Issue', text:'Payment gateway latency spike on 4G connections', status:'confirmed'},
+        {cause:'External Factor', text:'Competitor promo drawing price-sensitive users away', status:'rejected'},
+        {cause:'Mix Shift', text:'Mobile traffic share grew from 41% to 58%', status:'contributing'}
+      ],
+      rootCause:'Mobile checkout latency introduced by the Mar 14 redesign, compounded by a shift toward mobile traffic.',
+      validation:[['Structural','pass'],['Logical','pass'],['Business Rules','pass'],["Simpson's Paradox",'pass']],
+      schema:[
+        ['session_id','string','Primary key'],
+        ['user_id','string','FK to users'],
+        ['device','enum','mobile / desktop'],
+        ['checkout_step','enum','cart, shipping, payment, confirm'],
+        ['latency_ms','int','Page load latency'],
+        ['converted','bool','Order confirmed'],
+        ['traffic_source','string','utm_source'],
+        ['ts','timestamp','Event time, UTC']
+      ],
+      chart:{kind:'bar', labels:['W1','W2','W3','W4','W5','W6','W7'], values:[61,63,60,62,22,24,21], highlight:4, delta:'-38%'},
+      deckTitle:'Checkout conversion dropped 8pts after the mobile redesign shipped',
+      source:'checkout_events, Mar 1–Apr 30 · n = 412,880 sessions',
+      slides:[
+        {t:'The Question', b:'Why is checkout conversion dropping?'},
+        {t:'Four Hypotheses', b:'Product, technical, external, mix-shift'},
+        {t:'Root Cause', b:'Mobile latency, Mar 14 redesign'},
+        {t:'The Impact', b:'-8pts conversion, mobile segment'},
+        {t:'Opportunity', b:'$420K/quarter recoverable'},
+        {t:'Recommendation', b:'Roll back on slow connections; re-test'}
+      ],
+      term:[
+        {t:'header', text:'FRAME'},
+        {t:'agent', text:'Question Framing — 4 hypotheses generated across product, technical, external, mix-shift'},
+        {t:'agent', text:'Data Explorer — checkout_events profiled, 0 quality blockers'},
+        {t:'header', text:'ANALYZE'},
+        {t:'agent', text:'Source Tie-Out — pandas vs DuckDB match, proceeding'},
+        {t:'agent', text:'Descriptive Analytics — funnel + device segmentation complete'},
+        {t:'agent', text:'Root Cause Investigator — isolated: mobile checkout latency (Mar 14 redesign)'},
+        {t:'agent', text:'Validation — 4/4 layers pass'},
+        {t:'agent', text:'Opportunity Sizer — $420K/quarter recoverable, sensitivity-tested'},
+        {t:'header', text:'STORY'},
+        {t:'agent', text:'Story Architect — 6 narrative beats mapped'},
+        {t:'agent', text:'Coherence Reviewer — storyboard approved'},
+        {t:'agent', text:'Chart Maker — 4 charts built, 0 collisions'},
+        {t:'agent', text:'Design Critic — 4/4 charts pass 16-point review'},
+        {t:'header', text:'DECK'},
+        {t:'agent', text:'Storytelling — narrative drafted for VP audience'},
+        {t:'agent', text:'Deck Creator — 6-slide branded deck built'},
+        {t:'agent', text:'Slide Reviewer — lint gate clear'},
+        {t:'agent', text:'Comms Drafter — Slack summary + email brief ready'},
+        {t:'ok', text:'✓ Confidence grade: B+'},
+        {t:'ok', text:'✓ Time-to-deck: 1h 42m'}
+      ]
+    },
+    activation: {
+      id:'activation', label:'Activation Drop', mode:'deep_dive', modeLabel:'Deep Dive — analysis only',
+      command:'/run-pipeline plan=deep_dive question="Why did activation drop in Q3?"',
+      dataset:'activation_events',
+      phasesRun:['frame','analyze'],
+      agentsByPhase:{
+        frame:[['Question Framing','done'],['Data Explorer','done']],
+        analyze:[['Source Tie-Out','done'],['Descriptive Analytics','done'],['Root Cause Investigator','done'],['Validation','done'],['Opportunity Sizer','done']],
+        story:[], deck:[]
+      },
+      agentCount:7,
+      time:'54m', timeLabel:'Analysis time',
+      confidence:'B', gradeClass:'grade-b',
+      hypotheses:[
+        {cause:'Product Change', text:'Email verification step added to signup, Jul 2', status:'confirmed'},
+        {cause:'Technical Issue', text:'Verification emails delayed by spam filtering', status:'confirmed'},
+        {cause:'Mix Shift', text:'Self-serve signups grew relative to sales-assisted', status:'contributing'},
+        {cause:'External Factor', text:'Summer seasonality dip', status:'rejected'}
+      ],
+      rootCause:'The Jul 2 email verification step, worsened by delayed delivery, cut self-serve activation.',
+      validation:[['Structural','pass'],['Logical','pass'],['Business Rules','pass'],["Simpson's Paradox",'flag']],
+      schema:[
+        ['user_id','string','Primary key'],
+        ['signup_channel','enum','self-serve / sales-assisted'],
+        ['verified_email','bool','Verification completed'],
+        ['verification_delay_min','int','Minutes to verify'],
+        ['activated','bool','Reached activation event'],
+        ['activated_at','timestamp','Nullable'],
+        ['cohort_week','date','Signup week']
+      ],
+      chart:{kind:'bar', labels:['Apr','May','Jun','Jul','Aug','Sep'], values:[52,54,53,39,37,38], highlight:3, delta:'-14pts'},
+      deckTitle:null,
+      source:'activation_events, Apr–Sep · n = 88,410 signups',
+      slides:[],
+      term:[
+        {t:'header', text:'FRAME'},
+        {t:'agent', text:'Question Framing — 4 hypotheses generated'},
+        {t:'agent', text:'Data Explorer — activation_events profiled, 0 quality blockers'},
+        {t:'header', text:'ANALYZE'},
+        {t:'agent', text:'Source Tie-Out — pandas vs DuckDB match, proceeding'},
+        {t:'agent', text:'Descriptive Analytics — cohort + channel segmentation complete'},
+        {t:'agent', text:'Root Cause Investigator — isolated: Jul 2 email verification step'},
+        {t:'agent', text:"Validation — Simpson's Paradox flagged on signup-source cut, resolved after re-segmentation"},
+        {t:'agent', text:'Opportunity Sizer — activation recovery modeled, sensitivity-tested'},
+        {t:'dim', text:'STORY and DECK skipped — deep_dive mode'},
+        {t:'ok', text:'✓ Confidence grade: B'},
+        {t:'ok', text:'✓ Analysis time: 54m'}
+      ]
+    },
+    quickchart: {
+      id:'quickchart', label:'Quick Chart', mode:'quick_chart', modeLabel:'Quick Chart — single agent',
+      command:'Make a funnel chart of the checkout flow, highlighting the biggest drop-off step.',
+      dataset:'checkout_events',
+      phasesRun:['story'],
+      agentsByPhase:{ frame:[], analyze:[], story:[['Chart Maker','done'],['Design Critic','done']], deck:[] },
+      agentCount:2,
+      time:'3m', timeLabel:'Time to chart',
+      confidence:null, gradeClass:'',
+      hypotheses:[],
+      rootCause:null,
+      validation:[],
+      schema:[
+        ['session_id','string','Primary key'],
+        ['checkout_step','enum','cart, shipping, payment, confirm'],
+        ['reached_step','bool','Session reached this step'],
+        ['device','enum','mobile / desktop']
+      ],
+      chart:{kind:'funnel', labels:['Viewed Cart','Started Checkout','Entered Payment','Confirmed Order'], values:[100,72,54,49], highlight:2, delta:'-18pts biggest drop'},
+      deckTitle:'Checkout funnel — biggest drop-off at Payment',
+      source:'checkout_events, last 30 days',
+      slides:[],
+      term:[
+        {t:'header', text:'STORY'},
+        {t:'agent', text:'Chart Maker — funnel chart built, drop-off step highlighted'},
+        {t:'agent', text:'Design Critic — passes 16-point review, 0 collisions'},
+        {t:'dim', text:'FRAME, ANALYZE, and DECK skipped — quick_chart mode'},
+        {t:'ok', text:'✓ Chart approved'},
+        {t:'ok', text:'✓ Time: 3m'}
+      ]
+    }
+  };
+
+  var HISTORY = [
+    ['2026-07-27','Why is checkout conversion dropping?','full_presentation','B+','1h 42m'],
+    ['2026-07-21','Why did activation drop in Q3?','deep_dive','B','54m'],
+    ['2026-07-14','Funnel chart of the checkout flow','quick_chart','—','3m'],
+    ['2026-07-06',"What's driving pricing page bounce?",'validate_only','C — stayed internal','22m'],
+    ['2026-06-29','Compare EU vs US trial-to-paid','full_presentation','A-','1h 58m']
+  ];
+
+  var state = { mode:'terminal', scenario:'checkout', view:'Overview', ran:{} };
+
+  var scenarioRow = document.getElementById('scenario-row');
+  Object.keys(SCENARIOS).forEach(function(key){
+    var s = SCENARIOS[key];
+    var btn = document.createElement('button');
+    btn.className = 'scenario-pill' + (key === state.scenario ? ' active' : '');
+    btn.setAttribute('data-key', key);
+    btn.innerHTML = s.label + '<span class="mode-tag">' + s.modeLabel.split(' —')[0] + '</span>';
+    btn.addEventListener('click', function(){ selectScenario(key); });
+    scenarioRow.appendChild(btn);
+  });
+
+  document.getElementById('tab-terminal').addEventListener('click', function(){ selectMode('terminal'); });
+  document.getElementById('tab-dashboard').addEventListener('click', function(){ selectMode('dashboard'); });
+
+  function selectMode(mode){
+    state.mode = mode;
+    document.getElementById('tab-terminal').classList.toggle('active', mode==='terminal');
+    document.getElementById('tab-terminal').setAttribute('aria-selected', mode==='terminal');
+    document.getElementById('tab-dashboard').classList.toggle('active', mode==='dashboard');
+    document.getElementById('tab-dashboard').setAttribute('aria-selected', mode==='dashboard');
+    document.getElementById('terminal-view').style.display = mode==='terminal' ? '' : 'none';
+    document.getElementById('dashboard-view').style.display = mode==='dashboard' ? '' : 'none';
+    if (mode==='terminal') renderTerminal(); else renderDashboard();
+  }
+
+  function selectScenario(key){
+    state.scenario = key;
+    Array.prototype.forEach.call(scenarioRow.children, function(el){
+      el.classList.toggle('active', el.getAttribute('data-key') === key);
+    });
+    if (state.mode==='terminal') renderTerminal(); else renderDashboard();
+  }
+
+  function esc(s){ return s; }
+
+  /* ---------------- TERMINAL ---------------- */
+  function renderTerminal(){
+    var s = SCENARIOS[state.scenario];
+    var hasRun = !!state.ran[s.id];
+    var phaseNames = ['frame','analyze','story','deck'];
+    var stepperHtml = '<div class="stepper">' + phaseNames.map(function(p){
+      var cls = s.phasesRun.indexOf(p) === -1 ? 'skipped' : (hasRun ? 'done' : 'pending');
+      return '<div class="step ' + cls + '"><div class="step-label">' + p + '</div>' +
+        '<div class="step-sub">' + (s.phasesRun.indexOf(p) === -1 ? 'skipped' : (hasRun ? 'complete' : 'queued')) + '</div></div>';
+    }).join('') + '</div>';
+
+    var html = stepperHtml + '<div class="term-grid">' +
+      '<div class="term-pane">' +
+        '<p class="pane-label">Terminal <span>' + s.modeLabel + '</span></p>' +
+        '<div class="cmd-line">' + s.command + '</div>' +
+        '<button class="run-btn" id="run-btn" ' + (hasRun ? 'disabled' : '') + '>' + (hasRun ? 'Run Complete' : 'Run Pipeline') + '</button>' +
+        '<div class="term-log" id="term-log">' + (hasRun ? '' : '<span class="term-empty">Press Run Pipeline to simulate this scenario.</span>') + '</div>' +
+      '</div>' +
+      '<div class="out-pane" id="out-pane">' +
+        (hasRun ? outputPanelHtml(s) : '<div class="result-empty">Output appears here once the run completes.</div>') +
+      '</div>' +
+    '</div>';
+
+    document.getElementById('terminal-view').innerHTML = html;
+
+    if (hasRun){
+      renderLogInstant(s);
+      if (s.chart) drawChart(document.getElementById('chart-' + s.id), s.chart);
+    } else {
+      var btn = document.getElementById('run-btn');
+      if (btn) btn.addEventListener('click', function(){ runScenario(s); });
+    }
+  }
+
+  function renderLogInstant(s){
+    var log = document.getElementById('term-log');
+    if (!log) return;
+    log.innerHTML = s.term.map(lineHtml).join('\n');
+  }
+
+  function lineHtml(line){
+    if (line.t === 'header') return '<span class="l-header">&#9656; ' + line.text + '</span>';
+    if (line.t === 'ok') return '<span class="l-ok">' + line.text + '</span>';
+    if (line.t === 'dim') return '<span class="l-dim">' + line.text + '</span>';
+    return '<span class="l-agent">  ' + line.text + '</span>';
+  }
+
+  function runScenario(s){
+    var btn = document.getElementById('run-btn');
+    var log = document.getElementById('term-log');
+    btn.disabled = true;
+    btn.textContent = 'Running…';
+    log.innerHTML = '';
+
+    if (REDUCED){
+      state.ran[s.id] = true;
+      renderTerminal();
+      return;
+    }
+
+    var i = 0;
+    function step(){
+      if (i >= s.term.length){
+        state.ran[s.id] = true;
+        renderTerminal();
+        return;
+      }
+      var div = document.createElement('div');
+      div.innerHTML = lineHtml(s.term[i]);
+      log.appendChild(div.firstChild);
+      log.appendChild(document.createTextNode('\n'));
+      log.scrollTop = log.scrollHeight;
+      i++;
+      setTimeout(step, s.term[i-1] && s.term[i-1].t === 'header' ? 260 : 160);
+    }
+    step();
+  }
+
+  function outputPanelHtml(s){
+    if (!s.deckTitle){
+      return '<p class="pane-label">Analysis Result</p>' +
+        '<div class="deck-card">' +
+          '<p class="deck-eyebrow">' + s.dataset + '</p>' +
+          '<h3 class="deck-title">' + s.rootCause + '</h3>' +
+          '<canvas class="chart-area" id="chart-' + s.id + '" aria-label="Chart"></canvas>' +
+          '<p class="deck-source">Source: ' + s.source + '</p>' +
+          '<div class="badge-row">' +
+            '<span class="badge-pill ok">Validated</span>' +
+            '<span class="badge-pill">Grade ' + s.confidence + '</span>' +
+          '</div>' +
+          '<p class="no-deck-note">No deck generated in ' + s.modeLabel.split(' —')[0] + ' mode. Run full_presentation, or refresh_deck once ready, to build one.</p>' +
+        '</div>';
+    }
+    return '<p class="pane-label">Output</p>' +
+      '<div class="deck-card">' +
+        '<p class="deck-eyebrow">' + s.dataset + '</p>' +
+        '<h3 class="deck-title">' + s.deckTitle + '</h3>' +
+        '<canvas class="chart-area" id="chart-' + s.id + '" aria-label="Chart"></canvas>' +
+        '<p class="deck-source">Source: ' + s.source + '</p>' +
+        '<div class="badge-row">' +
+          '<span class="badge-pill ok">Validated</span>' +
+          (s.confidence ? '<span class="badge-pill">Grade ' + s.confidence + '</span>' : '') +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ---------------- DASHBOARD ---------------- */
+  var VIEWS = ['Overview','Pipeline','Data','Analysis','Deck','History'];
+
+  function renderDashboard(){
+    var s = SCENARIOS[state.scenario];
+    var sidebar = '<div class="sidebar">' + VIEWS.map(function(v){
+      return '<button class="side-link' + (state.view===v?' active':'') + '" data-view="' + v + '">' + v + '</button>';
+    }).join('') + '</div>';
+
+    document.getElementById('dashboard-view').innerHTML =
+      '<div class="app-shell">' + sidebar + '<div class="content" id="dash-content"></div></div>';
+
+    Array.prototype.forEach.call(document.querySelectorAll('.side-link'), function(btn){
+      btn.addEventListener('click', function(){ state.view = btn.getAttribute('data-view'); renderDashboard(); });
+    });
+
+    var content = document.getElementById('dash-content');
+    if (state.view === 'Overview') content.innerHTML = viewOverview(s);
+    else if (state.view === 'Pipeline') content.innerHTML = viewPipeline(s);
+    else if (state.view === 'Data') content.innerHTML = viewData(s);
+    else if (state.view === 'Analysis') content.innerHTML = viewAnalysis(s);
+    else if (state.view === 'Deck') content.innerHTML = viewDeck(s);
+    else content.innerHTML = viewHistory(s);
+
+    var chartCanvas = document.getElementById('dash-chart-' + s.id);
+    if (chartCanvas && s.chart) drawChart(chartCanvas, s.chart);
+  }
+
+  function viewOverview(s){
+    return '<h2 class="view-title">' + s.label + '</h2>' +
+      '<p class="view-sub">' + s.command + '</p>' +
+      '<div class="stat-grid">' +
+        '<div class="stat-tile"><div class="stat-value">' + s.modeLabel.split(' —')[0] + '</div><div class="stat-label">Pipeline mode</div></div>' +
+        '<div class="stat-tile"><div class="stat-value">' + s.dataset + '</div><div class="stat-label">Active dataset</div></div>' +
+        '<div class="stat-tile"><div class="stat-value ' + (s.gradeClass||'') + '">' + (s.confidence || '—') + '</div><div class="stat-label">Confidence grade</div></div>' +
+        '<div class="stat-tile"><div class="stat-value">' + s.time + '</div><div class="stat-label">' + s.timeLabel + '</div></div>' +
+      '</div>' +
+      '<p class="view-sub" style="margin-top:var(--md);">' + s.agentCount + ' of 18 agents involved in this run. See the Pipeline view for which ones, and why the rest were skipped.</p>';
+  }
+
+  function viewPipeline(s){
+    var phases = [['frame','Frame'],['analyze','Analyze'],['story','Story'],['deck','Deck']];
+    return '<h2 class="view-title">Pipeline Run</h2>' +
+      '<p class="view-sub">Agent status for this scenario\'s mode: ' + s.modeLabel + '.</p>' +
+      '<div class="board">' + phases.map(function(p){
+        var agents = s.agentsByPhase[p[0]];
+        var skipped = s.phasesRun.indexOf(p[0]) === -1;
+        return '<div class="board-col"><div class="board-col-head"><span>' + p[1] + '</span><span>' + agents.length + '</span></div>' +
+          (skipped ? '<p class="board-empty">Skipped in ' + s.modeLabel.split(' —')[0] + ' mode.</p>' :
+            agents.map(function(a){
+              return '<div class="agent-chip"><span class="agent-chip-name">' + a[0] + '</span><span class="agent-chip-status ' + a[1] + '">' + a[1] + '</span></div>';
+            }).join('')
+          ) + '</div>';
+      }).join('') + '</div>';
+  }
+
+  function viewData(s){
+    return '<h2 class="view-title">Active Dataset</h2>' +
+      '<p class="view-sub">' + s.dataset + '</p>' +
+      '<div class="data-table-scroll"><table class="data-table"><thead><tr><th>Column</th><th>Type</th><th>Note</th></tr></thead><tbody>' +
+        s.schema.map(function(r){ return '<tr><td class="mono">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>'; }).join('') +
+      '</tbody></table></div>';
+  }
+
+  function viewAnalysis(s){
+    if (!s.hypotheses.length){
+      return '<h2 class="view-title">Analysis</h2>' +
+        '<div class="empty-state"><strong>No analysis phase in this mode.</strong>' + s.modeLabel + ' jumps straight to Chart Maker — framing, hypotheses, and validation are skipped.</div>';
+    }
+    return '<h2 class="view-title">Analysis</h2>' +
+      '<div class="grade-block"><div class="grade-circle ' + (s.confidence==='B' || s.confidence==='B+' ? '' : 'warn') + '">' + s.confidence + '</div>' +
+        '<p class="grade-copy"><strong>Root cause:</strong> ' + s.rootCause + '</p></div>' +
+      '<div>' + s.hypotheses.map(function(h){
+        return '<div class="hyp-row"><span class="hyp-cause">' + h.cause + '</span><span class="hyp-text">' + h.text + '</span><span class="hyp-status ' + h.status + '">' + h.status + '</span></div>';
+      }).join('') + '</div>' +
+      '<div class="val-list">' + s.validation.map(function(v){
+        return '<div class="val-item"><div class="v-name">' + v[0] + '</div><div class="v-status ' + (v[1]==='pass'?'pass':'flag') + '">' + (v[1]==='pass' ? '✓ Pass' : '⚠ Flagged, resolved') + '</div></div>';
+      }).join('') + '</div>';
+  }
+
+  function viewDeck(s){
+    if (!s.deckTitle){
+      return '<h2 class="view-title">Deck</h2>' +
+        '<div class="empty-state"><strong>No deck in this mode.</strong>' + s.modeLabel + ' produces analysis only. Run full_presentation, or refresh_deck against this analysis, to generate slides.</div>';
+    }
+    if (!s.slides.length){
+      return '<h2 class="view-title">Deck</h2>' +
+        '<p class="view-sub">' + s.deckTitle + '</p>' +
+        '<div class="deck-card" style="max-width:480px;"><canvas class="chart-area" id="dash-chart-' + s.id + '" aria-label="Chart"></canvas>' +
+        '<p class="deck-source">Source: ' + s.source + '</p></div>' +
+        '<p class="view-sub" style="margin-top:var(--sm);">Single-chart output — quick_chart mode doesn\'t assemble a full deck.</p>';
+    }
+    return '<h2 class="view-title">Deck Preview</h2>' +
+      '<p class="view-sub">' + s.deckTitle + '</p>' +
+      '<div class="slide-grid">' + s.slides.map(function(sl, idx){
+        return '<div class="slide-card"><div class="slide-num">Slide ' + (idx+1) + '</div><div class="slide-title">' + sl.t + '</div><div class="slide-body">' + sl.b + '</div></div>';
+      }).join('') + '</div>';
+  }
+
+  function viewHistory(){
+    return '<h2 class="view-title">History</h2>' +
+      '<p class="view-sub">Past pipeline runs across datasets. Grade C and below stays internal.</p>' +
+      '<div class="data-table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Question</th><th>Mode</th><th>Grade</th><th>Time</th></tr></thead><tbody>' +
+        HISTORY.map(function(r){
+          return '<tr><td class="mono">' + r[0] + '</td><td>' + r[1] + '</td><td class="mono">' + r[2] + '</td><td>' + r[3] + '</td><td>' + r[4] + '</td></tr>';
+        }).join('') +
+      '</tbody></table></div>';
+  }
+
+  /* ---------------- CHART ---------------- */
+  function drawChart(canvas, spec){
+    if (!canvas) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var ctx = canvas.getContext('2d');
+    var rect = canvas.getBoundingClientRect();
+    var W = rect.width || 300, H = rect.height || 150;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H);
+
+    var padTop = 10, padBottom = 22, padX = 6;
+    var plotH = H - padTop - padBottom;
+    var n = spec.labels.length;
+    var barW = (W - padX * 2) / n;
+    var max = Math.max.apply(null, spec.values) * 1.08;
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padX, H - padBottom + 0.5);
+    ctx.lineTo(W - padX, H - padBottom + 0.5);
+    ctx.stroke();
+
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+
+    for (var i = 0; i < n; i++){
+      var v = spec.values[i];
+      var h = (v / max) * plotH;
+      var x = padX + i * barW + barW * 0.18;
+      var w = barW * 0.64;
+      var y = H - padBottom - h;
+      ctx.fillStyle = (i === spec.highlight) ? '#da291c' : 'rgba(255,255,255,0.28)';
+      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = (i === spec.highlight) ? '#ffffff' : 'rgba(255,255,255,0.45)';
+      var label = spec.labels[i].length > 10 ? spec.labels[i].slice(0,9)+'…' : spec.labels[i];
+      ctx.fillText(label, x + w/2, H - padBottom + 13);
+    }
+
+    if (spec.delta){
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.font = '600 11px -apple-system, sans-serif';
+      var hx = padX + spec.highlight * barW + barW * 0.18 - 4;
+      var hy = H - padBottom - ((spec.values[spec.highlight]/max)*plotH) - 8;
+      ctx.fillText(spec.delta, hx, hy);
+    }
+  }
+
+  renderTerminal();
+  window.addEventListener('resize', function(){
+    if (state.mode === 'terminal') renderTerminal(); else renderDashboard();
+  });
+})();
+</script>
